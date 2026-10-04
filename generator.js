@@ -51,7 +51,7 @@ function buildPool() {
 }
 
 const POOL_PER_TRY = 700;
-const TRIES = 15;
+const TRIES = 100;
 
 function tryLayout(pool, rnd) {
     const grid = Array.from({ length: SIZE }, () => Array(SIZE).fill(null));
@@ -137,7 +137,10 @@ function tryLayout(pool, rnd) {
                             const sc = dir === "across" ? c - i : c;
                             const x = check(w, sr, sc, dir);
                             if (x < 1) continue;
-                            const score = x * 10 + rnd() * 5;
+                            const score =
+                                x * 20 +
+                                (x / w.length) * 10 +
+                                rnd() * 3;
                             if (score > bestScore) {
                                 bestScore = score;
                                 best = [sr, sc, dir];
