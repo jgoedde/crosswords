@@ -1,10 +1,8 @@
-const STORAGE_KEY = "kreuzwort-state";
+const STORAGE_KEY = "kreuzwort-state-v2"; // v2: Layout mit Hinweisfeldern
 
 const boardEl = document.getElementById("board");
 const kbd = document.getElementById("kbd");
 const clueBar = document.getElementById("current-clue");
-const listAcross = document.getElementById("clues-across");
-const listDown = document.getElementById("clues-down");
 const timerEl = document.getElementById("timer");
 const messageEl = document.getElementById("message");
 const autoCheck = document.getElementById("chk-auto");
@@ -27,7 +25,6 @@ function start(seed, saved) {
         for (const [r, c] of w.cells) wordAt[r][c][w.dir] = w;
 
     renderBoard();
-    renderClues();
     const first =
         puzzle.words.find((w) => w.dir === "across") || puzzle.words[0];
     sel = { r: first.row, c: first.col, dir: first.dir };
@@ -48,11 +45,26 @@ function renderBoard() {
         for (let c = 0; c < SIZE; c++) {
             const el = document.createElement("div");
             el.className = "cell";
-            if (!puzzle.grid[r][c]) {
+            const clues = puzzle.clueGrid[r][c];
+            if (clues) {
+                el.classList.add("clue");
+                for (const dir of ["across", "down"]) {
+                    const w = clues[dir];
+                    if (!w) continue;
+                    const part = document.createElement("div");
+                    part.className = `clue-part ${dir}`;
+                    part.title = w.clue;
+                    part.innerHTML = `<span>${escapeHtml(w.clue)}</span>`;
+                    el.appendChild(part);
+                    w.clueEl = part;
+                }
+                el.addEventListener("mousedown", (e) => {
+                    e.preventDefault();
+                    onClueClick(clues);
+                });
+            } else if (!puzzle.grid[r][c]) {
                 el.classList.add("block");
             } else {
-                const num = puzzle.numbers.get(r * SIZE + c);
-                if (num) el.innerHTML = `<span class="num">${num}</span>`;
                 const letter = document.createElement("span");
                 letter.className = "letter";
                 el.appendChild(letter);
@@ -67,23 +79,20 @@ function renderBoard() {
     }
 }
 
-function renderClues() {
-    listAcross.innerHTML = "";
-    listDown.innerHTML = "";
-    for (const w of puzzle.words) {
-        const li = document.createElement("li");
-        li.innerHTML = `<span class="n">${w.number}</span><span>${escapeHtml(w.clue)} (${w.answer.length})</span>`;
-        li.addEventListener("mousedown", (e) => {
-            e.preventDefault();
-            const idx = w.cells.findIndex(([r, c]) => !entries[r][c]);
-            const [r, c] = w.cells[idx >= 0 ? idx : 0];
-            sel = { r, c, dir: w.dir };
-            updateAll();
-            focusInput();
-        });
-        w.li = li;
-        (w.dir === "across" ? listAcross : listDown).appendChild(li);
-    }
+// Klick auf ein Hinweisfeld: dessen Wort wählen; bei zwei Hinweisen abwechseln
+function onClueClick(clues) {
+    const words = [clues.across, clues.down].filter(Boolean);
+    const w =
+        words.length > 1 && words[0] === currentWord() ? words[1] : words[0];
+    selectWord(w);
+    focusInput();
+}
+
+function selectWord(w) {
+    const idx = w.cells.findIndex(([r, c]) => !entries[r][c]);
+    const [r, c] = w.cells[idx >= 0 ? idx : 0];
+    sel = { r, c, dir: w.dir };
+    updateAll();
 }
 
 function escapeHtml(s) {
@@ -126,27 +135,22 @@ function updateAll() {
     const cross =
         wordAt[sel.r][sel.c][sel.dir === "across" ? "down" : "across"];
     for (const w of puzzle.words) {
-        w.li.classList.toggle("active", w === word);
-        w.li.classList.toggle("cross", w === cross);
-        w.li.classList.toggle(
+        w.clueEl.classList.toggle("active", w === word);
+        w.clueEl.classList.toggle("cross", w === cross);
+        w.clueEl.classList.toggle(
             "done",
             w.cells.every(([r, c]) => entries[r][c]),
         );
     }
-    scrollIntoViewIfNeeded(word.li);
-    if (cross) scrollIntoViewIfNeeded(cross.li);
 
-    clueBar.textContent = `${word.number} ${word.dir === "across" ? "waagerecht" : "senkrecht"}: ${word.clue} (${word.answer.length})`;
+    clueBar.innerHTML =
+        clueLine(word, "main") + (cross ? clueLine(cross, "cross") : "");
     save();
 }
 
-function scrollIntoViewIfNeeded(el) {
-    const parent = el.closest(".clues > div");
-    const pr = parent.getBoundingClientRect(),
-        er = el.getBoundingClientRect();
-    if (er.top < pr.top + 40 || er.bottom > pr.bottom) {
-        parent.scrollTop += er.top - pr.top - pr.height / 3;
-    }
+function clueLine(w, cls) {
+    const arrow = w.dir === "across" ? "→" : "↓";
+    return `<div class="${cls}"><span class="arrow">${arrow}</span> ${escapeHtml(w.clue)} <span class="len">(${w.answer.length})</span></div>`;
 }
 
 // ---------- Eingabe ----------

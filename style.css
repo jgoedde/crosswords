@@ -75,17 +75,36 @@ main {
 }
 
 .board-wrap {
-    flex: 0 1 600px;
+    flex: 0 1 760px;
+    margin: 0 auto;
     min-width: 0;
 }
 
 #current-clue {
-    min-height: 2.6em;
+    min-height: 3.6em;
     padding: 8px 12px;
     margin-bottom: 8px;
     background: #dfe9fb;
     border-radius: 4px;
     font-weight: 500;
+}
+
+#current-clue .main {
+    font-size: 1.05rem;
+}
+#current-clue .cross {
+    margin-top: 2px;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: #555;
+}
+#current-clue .arrow {
+    color: #c0392b;
+    font-weight: 700;
+}
+#current-clue .len {
+    color: #777;
+    font-weight: 400;
 }
 
 #board-container {
@@ -97,7 +116,7 @@ main {
     /* feste Zeilen + minmax(0, …): Inhalt darf Zellen nicht strecken */
     grid-template-columns: repeat(15, minmax(0, 1fr));
     grid-template-rows: repeat(15, minmax(0, 1fr));
-    width: min(100%, 600px);
+    width: min(100%, 760px);
     aspect-ratio: 1;
     border: 2px solid #222;
     background: #222;
@@ -123,15 +142,76 @@ main {
     background: #2b2b2b;
     cursor: default;
 }
-.cell .num {
-    position: absolute;
-    top: 1px;
-    left: 2px;
-    font-size: clamp(7px, 1.3vw, 10px);
-    font-weight: 400;
-    line-height: 1;
-    color: #333;
+/* Hinweisfelder im Schwedenrätsel-Stil */
+.cell.clue {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: stretch;
+    background: #ece7d9;
+    font-size: clamp(5px, 1vw, 8.5px);
+    font-weight: 500;
+    line-height: 1.12;
+    text-transform: none;
+    text-align: center;
+    color: #222;
 }
+.clue-part {
+    position: relative;
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1px 3px 1px 1px;
+    overflow: hidden;
+    hyphens: auto;
+    overflow-wrap: anywhere;
+}
+.clue-part + .clue-part {
+    border-top: 1px solid #b9b19a;
+}
+.clue-part span {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+}
+.clue-part:only-child span {
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+}
+.clue-part.down {
+    padding: 1px 1px 4px;
+}
+.clue-part::after {
+    position: absolute;
+    color: #c0392b;
+    font-size: 8px;
+    line-height: 1;
+}
+.clue-part.across::after {
+    content: "▸";
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.clue-part.down::after {
+    content: "▾";
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.clue-part.active {
+    background: #cfe0ff;
+}
+.clue-part.cross {
+    background: #e3ebf8;
+}
+.clue-part.done {
+    color: #999;
+}
+
 .cell.in-word {
     background: #cfe0ff;
 }
@@ -188,71 +268,10 @@ main {
     font-weight: 600;
 }
 
-.clues {
-    flex: 1 1 360px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 16px;
-    max-height: calc(100vh - 140px);
-    min-width: 0;
-}
-.clues > div {
-    overflow-y: auto;
-    max-height: calc(100vh - 140px);
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-.clues h2 {
-    position: sticky;
-    top: 0;
-    margin: 0;
-    padding: 8px 12px;
-    font-size: 1rem;
-    background: #fff;
-    border-bottom: 1px solid #ddd;
-}
-.clues ol {
-    list-style: none;
-    margin: 0;
-    padding: 4px 0;
-}
-.clues li {
-    display: flex;
-    gap: 8px;
-    padding: 5px 12px;
-    cursor: pointer;
-    font-size: 0.92rem;
-    line-height: 1.35;
-    border-left: 4px solid transparent;
-}
-.clues li:hover {
-    background: #f2f2f2;
-}
-.clues li .n {
-    font-weight: 700;
-    min-width: 1.6em;
-    text-align: right;
-}
-.clues li.active {
-    background: #cfe0ff;
-    border-left-color: #2a6ad8;
-}
-.clues li.cross {
-    background: #eef3fc;
-}
-.clues li.done {
-    color: #999;
-}
-
 @media (max-width: 700px) {
     main {
         padding: 8px;
         gap: 12px;
-    }
-    .clues,
-    .clues > div {
-        max-height: none;
     }
     .toolbar .sep {
         display: none;

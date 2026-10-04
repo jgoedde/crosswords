@@ -50,14 +50,21 @@ function buildPool() {
     return [...byAnswer.values()];
 }
 
+const POOL_PER_TRY = 700;
+const TRIES = 15;
+
 function tryLayout(pool, rnd) {
     const grid = Array.from({ length: SIZE }, () => Array(SIZE).fill(null));
+    // Hinweisfelder: Feld direkt vor jedem Wortanfang, max. ein Hinweis pro Richtung
+    const clueGrid = Array.from({ length: SIZE }, () => Array(SIZE).fill(null));
     const placed = [];
     const get = (r, c) =>
         r < 0 || c < 0 || r >= SIZE || c >= SIZE ? null : grid[r][c];
 
     // Längere Wörter bevorzugt zuerst, aber mit Zufall
+    // Zufällige Teilmenge pro Versuch: schneller, und jedes Rätsel wirkt anders
     const order = shuffle(pool.slice(), rnd)
+        .slice(0, POOL_PER_TRY)
         .map((w) => ({ w, k: w.answer.length + rnd() * 6 }))
         .sort((a, b) => b.k - a.k)
         .map((x) => x.w);
@@ -69,12 +76,16 @@ function tryLayout(pool, rnd) {
         const endR = r + dr * (len - 1),
             endC = c + dc * (len - 1);
         if (r < 0 || c < 0 || endR >= SIZE || endC >= SIZE) return -1;
+        // Wort braucht ein Hinweisfeld davor, darf also nicht am Rand beginnen
+        if (r - dr < 0 || c - dc < 0) return -1;
         if (get(r - dr, c - dc) || get(endR + dr, endC + dc)) return -1;
+        if (clueGrid[r - dr][c - dc]?.[dir]) return -1;
         let crossings = 0;
         for (let i = 0; i < len; i++) {
             const rr = r + dr * i,
                 cc = c + dc * i;
             const cur = grid[rr][cc];
+            if (clueGrid[rr][cc]) return -1; // Hinweisfeld bleibt frei
             if (cur) {
                 if (cur !== word[i]) return -1;
                 crossings++;
@@ -91,13 +102,15 @@ function tryLayout(pool, rnd) {
             dc = dir === "across" ? 1 : 0;
         for (let i = 0; i < entry.answer.length; i++)
             grid[r + dr * i][c + dc * i] = entry.answer[i];
-        placed.push({ ...entry, row: r, col: c, dir });
+        const word = { ...entry, row: r, col: c, dir };
+        (clueGrid[r - dr][c - dc] ||= {})[dir] = word;
+        placed.push(word);
     }
 
     // Erstes Wort mittig
     const first =
         order.find((w) => w.answer.length >= 7 && w.answer.length <= 11) ||
-        order[0];
+        order.find((w) => w.answer.length <= SIZE - 2);
     const firstDir = rnd() < 0.5 ? "across" : "down";
     const off = Math.floor((SIZE - first.answer.length) / 2);
     const mid = Math.floor(SIZE / 2);
@@ -143,26 +156,20 @@ function tryLayout(pool, rnd) {
 
     let filled = 0;
     for (const row of grid) for (const ch of row) if (ch) filled++;
-    return { grid, placed, filled };
+    return { grid, clueGrid, placed, filled };
 }
 
 function generatePuzzle(seed) {
     const rnd = mulberry32(seed);
     const pool = buildPool();
     let best = null;
-    for (let attempt = 0; attempt < 25; attempt++) {
+    for (let attempt = 0; attempt < TRIES; attempt++) {
         const res = tryLayout(pool, rnd);
         if (!best || res.filled > best.filled) best = res;
     }
 
-    // Nummerierung
-    const starts = new Map();
     best.placed.sort((a, b) => a.row - b.row || a.col - b.col);
-    let n = 0;
     for (const w of best.placed) {
-        const key = w.row * SIZE + w.col;
-        if (!starts.has(key)) starts.set(key, ++n);
-        w.number = starts.get(key);
         w.clue = w.clues[Math.floor(rnd() * w.clues.length)];
         w.cells = [];
         for (let i = 0; i < w.answer.length; i++) {
@@ -176,7 +183,7 @@ function generatePuzzle(seed) {
     return {
         seed,
         grid: best.grid,
+        clueGrid: best.clueGrid,
         words: best.placed,
-        numbers: starts,
     };
 }
