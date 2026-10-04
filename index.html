@@ -1,58 +1,71 @@
 <!doctype html>
 <html lang="de">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kreuzworträtsel</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <header>
-    <h1>Kreuzworträtsel</h1>
-    <div class="toolbar">
-      <button id="btn-new">Neues Rätsel</button>
-      <span class="sep"></span>
-      <button id="btn-check-word">Wort prüfen</button>
-      <button id="btn-check-all">Alles prüfen</button>
-      <span class="sep"></span>
-      <button id="btn-reveal-letter">Buchstabe aufdecken</button>
-      <button id="btn-reveal-word">Wort aufdecken</button>
-      <button id="btn-reveal-all">Lösung</button>
-      <span class="sep"></span>
-      <label><input type="checkbox" id="chk-auto"> Fehler sofort zeigen</label>
-      <span id="timer">00:00</span>
-    </div>
-  </header>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Kreuzworträtsel</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <header>
+            <h1>Kreuzworträtsel</h1>
+            <div class="toolbar">
+                <button id="btn-new">Neues Rätsel</button>
+                <span class="sep"></span>
+                <button id="btn-check-word">Wort prüfen</button>
+                <button id="btn-check-all">Alles prüfen</button>
+                <span class="sep"></span>
+                <button id="btn-reveal-letter">Buchstabe aufdecken</button>
+                <button id="btn-reveal-word">Wort aufdecken</button>
+                <button id="btn-reveal-all">Lösung</button>
+                <span class="sep"></span>
+                <label
+                    ><input type="checkbox" id="chk-auto" /> Fehler sofort
+                    zeigen</label
+                >
+                <span id="timer">00:00</span>
+            </div>
+        </header>
 
-  <main>
-    <section class="board-wrap">
-      <div id="current-clue" aria-live="polite">&nbsp;</div>
-      <div id="board-container">
-        <div id="board" role="grid" aria-label="Rätselgitter"></div>
-        <input id="kbd" type="text" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" aria-label="Eingabe">
-      </div>
-      <p class="hint">
-        Klicken = Feld wählen, nochmal klicken oder Leertaste = Richtung wechseln.
-        Pfeiltasten bewegen, Tab / Umschalt+Tab = nächstes / vorheriges Wort.
-        Ä = AE, Ö = OE, Ü = UE, ß = SS (Ä tippen schreibt automatisch AE).
-      </p>
-      <div id="message" hidden></div>
-    </section>
+        <main>
+            <section class="board-wrap">
+                <div id="current-clue" aria-live="polite">&nbsp;</div>
+                <div id="board-container">
+                    <div id="board" role="grid" aria-label="Rätselgitter"></div>
+                    <input
+                        id="kbd"
+                        type="text"
+                        autocomplete="off"
+                        autocorrect="off"
+                        autocapitalize="characters"
+                        spellcheck="false"
+                        aria-label="Eingabe"
+                    />
+                </div>
+                <p class="hint">
+                    Klicken = Feld wählen, nochmal klicken oder Leertaste =
+                    Richtung wechseln. Pfeiltasten bewegen, Tab / Umschalt+Tab =
+                    nächstes / vorheriges Wort. Ä = AE, Ö = OE, Ü = UE, ß = SS
+                    (Ä tippen schreibt automatisch AE).
+                </p>
+                <div id="message" hidden></div>
+            </section>
 
-    <section class="clues">
-      <div>
-        <h2>Waagerecht</h2>
-        <ol id="clues-across"></ol>
-      </div>
-      <div>
-        <h2>Senkrecht</h2>
-        <ol id="clues-down"></ol>
-      </div>
-    </section>
-  </main>
+            <section class="clues">
+                <div>
+                    <h2>Waagerecht</h2>
+                    <ol id="clues-across"></ol>
+                </div>
+                <div>
+                    <h2>Senkrecht</h2>
+                    <ol id="clues-down"></ol>
+                </div>
+            </section>
+        </main>
 
-  <script src="words.js"></script>
-  <script src="generator.js"></script>
-  <script src="app.js"></script>
-</body>
+        <script src="words.js"></script>
+        <script src="words/alltag-kurz.js"></script>
+        <script src="generator.js"></script>
+        <script src="app.js"></script>
+    </body>
 </html>

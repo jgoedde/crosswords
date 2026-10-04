@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="de">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Hinweise prüfen</title>
+        <link rel="stylesheet" href="style.css" />
+        <style>
+            .review {
+                max-width: 640px;
+                margin: 24px auto;
+                padding: 0 16px;
+            }
+            .card {
+                background: #fff;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                padding: 24px;
+                text-align: center;
+            }
+            .card .clue {
+                font-size: 1.35rem;
+                font-weight: 500;
+                margin: 8px 0 20px;
+            }
+            .card .answer {
+                font-size: 1.6rem;
+                font-weight: 700;
+                letter-spacing: 0.15em;
+                min-height: 2.2rem;
+            }
+            .card .meta {
+                color: #888;
+                font-size: 0.8rem;
+            }
+            .card .prev {
+                color: #888;
+                font-size: 0.85rem;
+                margin-top: 8px;
+            }
+            .actions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                justify-content: center;
+                margin-top: 20px;
+            }
+            .actions button {
+                min-width: 120px;
+            }
+            .actions kbd {
+                font-size: 0.75rem;
+                color: #888;
+                margin-left: 4px;
+            }
+            .stats {
+                margin: 12px 0;
+                font-size: 0.9rem;
+                color: #555;
+            }
+            .filters {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+                align-items: center;
+                font-size: 0.9rem;
+            }
+            textarea {
+                width: 100%;
+                height: 220px;
+                font-family: ui-monospace, monospace;
+                font-size: 0.8rem;
+            }
+            details {
+                margin-top: 24px;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>Hinweise prüfen</h1>
+            <div class="filters">
+                <label
+                    >Datei:
+                    <select id="file"></select>
+                </label>
+                <label
+                    ><input type="checkbox" id="only-unrated" checked /> nur
+                    unbewertete</label
+                >
+                <a href="index.html">zurück zum Rätsel</a>
+            </div>
+        </header>
+
+        <div class="review">
+            <div class="stats" id="stats"></div>
+            <div class="card">
+                <div class="meta" id="meta"></div>
+                <div class="clue" id="clue"></div>
+                <div class="answer" id="answer"></div>
+                <div class="prev" id="prev"></div>
+                <div class="actions" id="reveal-actions">
+                    <button id="btn-reveal">
+                        Aufdecken <kbd>Leertaste</kbd>
+                    </button>
+                    <button id="btn-skip">Überspringen <kbd>S</kbd></button>
+                </div>
+                <div class="actions" id="rate-actions" hidden>
+                    <button data-rate="gut">gut <kbd>1</kbd></button>
+                    <button data-rate="zu leicht">
+                        zu leicht <kbd>2</kbd>
+                    </button>
+                    <button data-rate="unklar">
+                        zu schwer / unklar <kbd>3</kbd>
+                    </button>
+                    <button data-rate="falsch">falsch <kbd>4</kbd></button>
+                </div>
+            </div>
+
+            <details open>
+                <summary>Export (alles außer „gut“)</summary>
+                <p class="hint">
+                    Diesen Text an Claude geben. Bewertungen werden nur in
+                    diesem Browser gespeichert.
+                </p>
+                <textarea id="export" readonly></textarea>
+                <div class="actions">
+                    <button id="btn-copy">Kopieren</button>
+                    <button id="btn-reset">Alle Bewertungen löschen</button>
+                </div>
+            </details>
+        </div>
+
+        <!-- gleiche Wortdateien wie index.html -->
+        <script>
+            const SOURCES = [];
+            function mark(file) {
+                const start = SOURCES.length
+                    ? SOURCES[SOURCES.length - 1].end
+                    : 0;
+                SOURCES.push({ file, start, end: WORDS.length });
+            }
+        </script>
+        <script src="words.js"></script>
+        <script>
+            mark("words.js");
+        </script>
+        <script src="words/alltag-kurz.js"></script>
+        <script>
+            mark("words/alltag-kurz.js");
+        </script>
+        <script src="generator.js"></script>
+        <script src="review.js"></script>
+    </body>
+</html>
