@@ -1,19 +1,26 @@
 #!/usr/bin/env node
-// Prüft die Wortlisten: Duplikate, Länge, Antwort im Hinweis, leere Hinweise.
-// Aufruf: node data/check-words.js
+
+/**
+ * Prüft die Wortliste auf:
+ * - ungültige Antworten
+ * - falsche Wortlänge
+ * - leere Hinweise
+ * - Antwort im Hinweis
+ * - doppelte Antworten
+ * - ungültige Eintragsstruktur
+ *
+ * Aufruf:
+ *   node data/check-words.js
+ */
+
 const fs = require("fs");
 const path = require("path");
+
 const root = path.join(__dirname, "..");
+const wordsFile = path.join(root, "words.js");
 
-const html = fs
-    .readFileSync(path.join(root, "index.html"), "utf8")
-    .replace(/<!--[\s\S]*?-->/g, "");
-const files = [...html.matchAll(/<script src="(words[^"]*)"/g)].map(
-    (m) => m[1],
-);
-
-const norm = (w) =>
-    w
+const norm = (value) =>
+    String(value)
         .toUpperCase()
         .replace(/Ä/g, "AE")
         .replace(/Ö/g, "OE")
@@ -21,57 +28,172 @@ const norm = (w) =>
         .replace(/ß/g, "SS")
         .replace(/[^A-Z]/g, "");
 
-let WORDS;
-const sources = [];
-for (const f of files) {
-    const src = fs
-        .readFileSync(path.join(root, f), "utf8")
-        .replace("const WORDS", "WORDS");
-    const before = WORDS ? WORDS.length : 0;
-    eval(src);
-    sources.push([f, before, WORDS.length]);
-}
-const fileOf = (i) => sources.find(([, a, b]) => i >= a && i < b)[0];
-
-const seen = new Map();
-const problems = [];
-const dupes = []; // werden im Generator zusammengeführt, nur Info
-const lengths = {};
-WORDS.forEach(([raw, ...clues], i) => {
-    const a = norm(raw);
-    const where = `${fileOf(i)}: ${raw}`;
-    if (a.length < 3 || a.length > 15)
-        problems.push(`${where} – Länge ${a.length}`);
-    if (!clues.some((c) => c && c.trim()))
-        problems.push(`${where} – kein Hinweis`);
-    for (const c of clues) {
-        const words = c.split(/[^\p{L}]+/u).map(norm);
-        if (words.includes(a))
-            problems.push(`${where} – Antwort im Hinweis: "${c}"`);
+function loadWords() {
+    if (!fs.existsSync(wordsFile)) {
+        console.error(`Fehler: ${wordsFile} nicht gefunden.`);
+        process.exit(1);
     }
-    if (seen.has(a)) dupes.push(`${raw} (${seen.get(a)} + ${fileOf(i)})`);
-    else seen.set(a, fileOf(i));
-    lengths[a.length] = (lengths[a.length] || 0) + 1;
-});
 
-console.log(
-    "Dateien:",
-    sources.map(([f, a, b]) => `${f} (${b - a})`).join(", "),
-);
-console.log(
-    "Einträge gesamt:",
-    WORDS.length,
-    "– eindeutige Antworten:",
-    seen.size,
-);
-console.log(
-    "Nach Länge:",
-    Object.entries(lengths)
-        .map(([l, n]) => `${l}:${n}`)
-        .join(" "),
-);
-if (dupes.length)
-    console.log(
-        `Doppelt (Hinweise werden zusammengeführt): ${dupes.length} – ${dupes.join(", ")}`,
+    const source = fs.readFileSync(wordsFile, "utf8");
+
+    // Erwartet: const WORDS = [...]
+    const match = source.match(
+        /(?:const|let|var)\s+WORDS\s*=\s*(\[[\s\S]*\])\s*;?\s*$/,
     );
-console.log(problems.length ? problems.join("\n") : "Keine Probleme gefunden.");
+
+    if (!match) {
+        console.error(
+            `Fehler: Keine gültige "const WORDS = [...]"-Liste in ${wordsFile} gefunden.`,
+        );
+        process.exit(1);
+    }
+
+    try {
+        // Die Datei enthält eine reine JS-Array-Struktur.
+        // JSON.parse funktioniert deshalb nicht bei einfachen JS-Arrays
+        // mit trailing commas etc. -> Function ist hier bewusst lokal
+        // und nur auf die eigene words.js angewendet.
+        return Function(`"use strict"; return (${match[1]});`)();
+    } catch (error) {
+        console.error(`Fehler beim Einlesen von ${wordsFile}:`);
+        console.error(error.message);
+        process.exit(1);
+    }
+}
+
+const WORDS = loadWords();
+
+const problems = [];
+const duplicates = new Map();
+const seen = new Map();
+const lengths = {};
+
+for (const [index, entry] of WORDS.entries()) {
+    const where = `words.js [${index + 1}]`;
+
+    if (!Array.isArray(entry)) {
+        problems.push(`${where} – Eintrag ist kein Array`);
+        continue;
+    }
+
+    if (entry.length < 2) {
+        problems.push(`${where} – Antwort oder Hinweis fehlt`);
+        continue;
+    }
+
+    const [raw, ...clues] = entry;
+
+    if (typeof raw !== "string" || !raw.trim()) {
+        problems.push(`${where} – ungültige Antwort: ${String(raw)}`);
+        continue;
+    }
+
+    const answer = norm(raw);
+
+    // Antwortlänge
+    if (answer.length < 3 || answer.length > 15) {
+        problems.push(
+            `${where}: "${raw}" – Länge ${answer.length} (erlaubt: 3–15)`,
+        );
+    }
+
+    // Normalisierung darf die Antwort nicht komplett zerstören.
+    if (!answer) {
+        problems.push(`${where}: "${raw}" – Antwort enthält keine Buchstaben`);
+        continue;
+    }
+
+    // Hinweise
+    const validClues = clues.filter(
+        (clue) => typeof clue === "string" && clue.trim(),
+    );
+
+    if (!validClues.length) {
+        problems.push(`${where}: "${raw}" – kein Hinweis`);
+    }
+
+    for (const clue of validClues) {
+        const clueWords = clue.split(/[^\p{L}]+/u).map(norm).filter(Boolean);
+
+        if (clueWords.includes(answer)) {
+            problems.push(
+                `${where}: "${raw}" – Antwort im Hinweis: "${clue}"`,
+            );
+        }
+    }
+
+    // Mehr als 3 Hinweise
+    if (validClues.length > 3) {
+        problems.push(
+            `${where}: "${raw}" – ${validClues.length} Hinweise (maximal 3)`,
+        );
+    }
+
+    // Doppelte Antworten nach Generator-Normalisierung
+    if (seen.has(answer)) {
+        const first = seen.get(answer);
+
+        if (!duplicates.has(answer)) {
+            duplicates.set(answer, [first]);
+        }
+
+        duplicates.get(answer).push(where);
+    } else {
+        seen.set(answer, where);
+    }
+
+    // Statistik nach Länge
+    lengths[answer.length] = (lengths[answer.length] || 0) + 1;
+}
+
+const uniqueCount = seen.size;
+const duplicateCount = WORDS.length - uniqueCount;
+
+console.log("");
+console.log("=== WORDLIST CHECK ===");
+console.log("");
+
+console.log(`Datei:              words.js`);
+console.log(`Einträge gesamt:    ${WORDS.length}`);
+console.log(`Eindeutige Wörter:  ${uniqueCount}`);
+console.log(`Duplikate:          ${duplicateCount}`);
+console.log(`Probleme:           ${problems.length}`);
+
+console.log("");
+console.log("Nach Länge:");
+
+for (const [length, count] of Object.entries(lengths).sort(
+    ([a], [b]) => Number(a) - Number(b),
+)) {
+    console.log(`  ${String(length).padStart(2)}: ${count}`);
+}
+
+if (duplicates.size) {
+    console.log("");
+    console.log("Duplikate:");
+
+    for (const [answer, locations] of duplicates) {
+        console.log(`  ${answer}`);
+        for (const location of locations) {
+            console.log(`    - ${location}`);
+        }
+    }
+}
+
+if (problems.length) {
+    console.log("");
+    console.log("Probleme:");
+
+    for (const problem of problems) {
+        console.log(`  - ${problem}`);
+    }
+}
+
+console.log("");
+
+if (problems.length) {
+    console.log("✗ Prüfung fehlgeschlagen.");
+    process.exitCode = 1;
+} else {
+    console.log("✓ Keine technischen Probleme gefunden.");
+}
