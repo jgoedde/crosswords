@@ -138,9 +138,7 @@ function tryLayout(pool, rnd) {
                             const x = check(w, sr, sc, dir);
                             if (x < 1) continue;
                             const score =
-                                x * 20 +
-                                (x / w.length) * 10 +
-                                rnd() * 3;
+                                x * 20 + (x / w.length) * 10 + rnd() * 3;
                             if (score > bestScore) {
                                 bestScore = score;
                                 best = [sr, sc, dir];

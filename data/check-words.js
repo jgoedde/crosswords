@@ -1,10 +1,13 @@
+#!/usr/bin/env node
 // Prüft die Wortlisten: Duplikate, Länge, Antwort im Hinweis, leere Hinweise.
 // Aufruf: node data/check-words.js
 const fs = require("fs");
 const path = require("path");
 const root = path.join(__dirname, "..");
 
-const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
+const html = fs
+    .readFileSync(path.join(root, "index.html"), "utf8")
+    .replace(/<!--[\s\S]*?-->/g, "");
 const files = [...html.matchAll(/<script src="(words[^"]*)"/g)].map(
     (m) => m[1],
 );
