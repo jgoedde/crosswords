@@ -94,7 +94,9 @@ main {
 
 #board {
     display: grid;
-    grid-template-columns: repeat(15, 1fr);
+    /* feste Zeilen + minmax(0, …): Inhalt darf Zellen nicht strecken */
+    grid-template-columns: repeat(15, minmax(0, 1fr));
+    grid-template-rows: repeat(15, minmax(0, 1fr));
     width: min(100%, 600px);
     aspect-ratio: 1;
     border: 2px solid #222;
@@ -112,8 +114,10 @@ main {
     justify-content: center;
     font-size: clamp(12px, 3.2vw, 22px);
     font-weight: 600;
+    line-height: 1;
     text-transform: uppercase;
     cursor: pointer;
+    overflow: hidden;
 }
 .cell.block {
     background: #2b2b2b;
