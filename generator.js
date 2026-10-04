@@ -30,23 +30,24 @@ function shuffle(arr, rnd) {
     return arr;
 }
 
+// Doppelte Antworten (z. B. aus verschiedenen Wortdateien) werden zusammengeführt:
+// ihre Hinweise landen gemeinsam in einem Eintrag.
 function buildPool() {
-    const seen = new Set();
-    const pool = [];
+    const byAnswer = new Map();
     for (const [raw, ...clues] of WORDS) {
         const answer = normalize(raw);
         const valid = clues.filter((c) => c && c.trim());
-        if (
-            answer.length < 3 ||
-            answer.length > SIZE ||
-            !valid.length ||
-            seen.has(answer)
-        )
+        if (answer.length < 3 || answer.length > SIZE || !valid.length)
             continue;
-        seen.add(answer);
-        pool.push({ answer, clues: valid });
+        const entry = byAnswer.get(answer);
+        if (entry) {
+            for (const c of valid)
+                if (!entry.clues.includes(c)) entry.clues.push(c);
+        } else {
+            byAnswer.set(answer, { answer, clues: valid });
+        }
     }
-    return pool;
+    return [...byAnswer.values()];
 }
 
 function tryLayout(pool, rnd) {

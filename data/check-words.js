@@ -32,6 +32,7 @@ const fileOf = (i) => sources.find(([, a, b]) => i >= a && i < b)[0];
 
 const seen = new Map();
 const problems = [];
+const dupes = []; // werden im Generator zusammengeführt, nur Info
 const lengths = {};
 WORDS.forEach(([raw, ...clues], i) => {
     const a = norm(raw);
@@ -45,8 +46,7 @@ WORDS.forEach(([raw, ...clues], i) => {
         if (words.includes(a))
             problems.push(`${where} – Antwort im Hinweis: "${c}"`);
     }
-    if (seen.has(a))
-        problems.push(`${where} – doppelt (auch in ${seen.get(a)})`);
+    if (seen.has(a)) dupes.push(`${raw} (${seen.get(a)} + ${fileOf(i)})`);
     else seen.set(a, fileOf(i));
     lengths[a.length] = (lengths[a.length] || 0) + 1;
 });
@@ -67,4 +67,8 @@ console.log(
         .map(([l, n]) => `${l}:${n}`)
         .join(" "),
 );
+if (dupes.length)
+    console.log(
+        `Doppelt (Hinweise werden zusammengeführt): ${dupes.length} – ${dupes.join(", ")}`,
+    );
 console.log(problems.length ? problems.join("\n") : "Keine Probleme gefunden.");
