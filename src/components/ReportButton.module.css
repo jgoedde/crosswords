@@ -1,0 +1,35 @@
+.button {
+    padding: 0.2rem 0.55rem;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--cell-bg);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.button:hover {
+    background: var(--hover);
+}
+
+.form {
+    display: flex;
+    gap: 0.375rem;
+}
+
+.input {
+    width: 14rem;
+    padding: 0.2rem 0.45rem;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font: inherit;
+    font-size: 0.85rem;
+}
+
+.done {
+    color: var(--muted);
+    font-size: 0.8rem;
+    white-space: nowrap;
+}

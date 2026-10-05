@@ -6,6 +6,7 @@ import { randomSeed } from "./game/random.ts";
 import { useGame } from "./hooks/useGame.ts";
 import { usePuzzle } from "./hooks/usePuzzle.ts";
 import { useSeed } from "./hooks/useSeed.ts";
+import { useReports } from "./hooks/useReports.ts";
 import styles from "./App.module.css";
 
 export function App() {
@@ -36,6 +37,7 @@ function Game({
     onNewPuzzle: () => void;
 }) {
     const { state, dispatch, solved } = useGame(puzzle);
+    const reports = useReports();
     return (
         <main className={styles.app}>
             <Toolbar
@@ -44,7 +46,7 @@ function Game({
                 dispatch={dispatch}
                 onNewPuzzle={onNewPuzzle}
             />
-            <ClueBar state={state} solved={solved} />
+            <ClueBar state={state} solved={solved} reports={reports} />
             <Board state={state} dispatch={dispatch} />
             <p className={styles.help}>
                 Feld anklicken und tippen · nochmal klicken oder Leertaste:
