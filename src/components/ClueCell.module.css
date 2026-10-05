@@ -1,0 +1,64 @@
+.cell {
+    display: flex;
+    flex-direction: column;
+    background: var(--clue-bg);
+    container-type: size;
+    overflow: hidden;
+}
+
+.empty {
+    background: var(--dead-bg);
+}
+
+.clue {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3%;
+    border: 0;
+    background: none;
+    color: var(--clue-ink);
+    font: inherit;
+    line-height: 1.02;
+    text-align: center;
+    hyphens: auto;
+    overflow-wrap: anywhere;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.clue + .clue {
+    border-top: 1px solid var(--line);
+}
+
+.clue:hover {
+    background: var(--hover);
+}
+
+.active {
+    background: var(--word-bg);
+    color: var(--ink);
+}
+
+.active:hover {
+    background: var(--word-bg);
+}
+
+/* Größe relativ zum Feld (Container-Einheiten) */
+.large {
+    font-size: 19cqw;
+}
+
+.medium {
+    font-size: 15.5cqw;
+}
+
+.small {
+    font-size: 13cqw;
+}
+
+.tiny {
+    font-size: 11cqw;
+}

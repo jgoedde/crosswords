@@ -1,0 +1,59 @@
+.bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2.25rem;
+    margin: 0 auto 0.5rem;
+    max-width: calc(15 * 3.75rem);
+}
+
+.title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.seed {
+    padding: 0.125rem 0.375rem;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+}
+
+.seed:hover {
+    color: var(--ink);
+}
+
+.spacer {
+    flex: 1;
+}
+
+.question {
+    margin-right: 0.25rem;
+}
+
+.button {
+    padding: 0.3rem 0.65rem;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--cell-bg);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.button:hover {
+    background: var(--hover);
+}
+
+.button[aria-pressed="true"] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--cell-bg);
+}

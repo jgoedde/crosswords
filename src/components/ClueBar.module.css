@@ -1,0 +1,35 @@
+.bar {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    min-height: 2.5rem;
+    margin: 0 auto 0.75rem;
+    padding: 0.5rem 0.75rem;
+    max-width: 40rem;
+    border-bottom: 1px solid var(--line);
+    font-size: 1.1rem;
+}
+
+.direction {
+    color: var(--muted);
+}
+
+.clue {
+    flex: 1;
+}
+
+.length {
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.length::after {
+    content: " Buchst.";
+}
+
+.solved {
+    justify-content: center;
+    color: var(--ok);
+    font-weight: 600;
+}

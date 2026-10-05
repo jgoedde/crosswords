@@ -1,0 +1,30 @@
+.wrap {
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.board {
+    /* Feldgröße: passt in Breite und Höhe des Fensters */
+    --cell: min(calc((100vw - 2rem) / 15), calc((100dvh - 9rem) / 15), 3.75rem);
+    display: grid;
+    grid-template-columns: repeat(15, var(--cell));
+    grid-auto-rows: var(--cell);
+    gap: 1px;
+    padding: 1px;
+    background: var(--line);
+    outline: 2px solid var(--ink);
+}
+
+/* unsichtbares Eingabefeld, fängt Tastatur und Handy-Eingaben */
+.input {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    font-size: 16px; /* verhindert Zoom auf iOS */
+}

@@ -1,0 +1,37 @@
+.arrow {
+    position: absolute;
+    width: 30%;
+    height: 30%;
+    fill: none;
+    stroke: var(--arrow);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+}
+
+.right {
+    left: 0;
+    top: 35%;
+}
+
+.down {
+    top: 0;
+    left: 35%;
+}
+
+.down-right,
+.right-down {
+    top: 0;
+    left: 0;
+}
+
+.up-right {
+    bottom: 0;
+    left: 0;
+}
+
+.left-down {
+    top: 0;
+    right: 0;
+}
