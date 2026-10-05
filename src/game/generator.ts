@@ -1,7 +1,7 @@
 import { buildEntries, type Entry, Trie } from "./dictionary.ts";
 import { createRng, hashSeed, type Rng } from "./random.ts";
 
-export const SIZE = 15;
+export const SIZE = 13;
 
 export type Direction = "across" | "down";
 
