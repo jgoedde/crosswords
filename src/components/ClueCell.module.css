@@ -15,15 +15,19 @@
     min-height: 0;
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 0 2%;
+    justify-content: flex-start;
+    padding: 0 5%;
     border: 0;
     background: none;
     color: var(--clue-ink);
     font: inherit;
+    /* schmale, fette Schrift wie im gedruckten Rätsel */
+    font-family:
+        "Arial Narrow", "Roboto Condensed", "Helvetica Neue", Arial, sans-serif;
+    font-stretch: condensed;
+    font-weight: 700;
     line-height: 1.05;
-    font-weight: 500;
-    text-align: center;
+    text-align: left;
     hyphens: auto;
     overflow-wrap: anywhere;
     overflow: hidden;
@@ -31,7 +35,7 @@
 }
 
 .clue + .clue {
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--grid);
 }
 
 .clue:hover {

@@ -12,10 +12,10 @@ interface Props {
  * Fläche reicht für die Zeichenzahl, längstes Wort wird höchstens einmal getrennt.
  */
 function fontSize(text: string, split: boolean): number {
-    const area = split ? 66 : 95;
+    const area = split ? 76 : 110;
     const max = split ? 24 : 30;
     const longest = Math.max(...text.split(/[\s-]+/).map((w) => w.length));
-    const size = Math.min(area / Math.sqrt(text.length), 230 / longest, max);
+    const size = Math.min(area / Math.sqrt(text.length), 270 / longest, max);
     return Math.max(size, split ? 12 : 14);
 }
 

@@ -12,7 +12,7 @@
     grid-auto-rows: var(--cell);
     gap: 1px;
     padding: 1px;
-    background: var(--line);
+    background: var(--grid);
     outline: 2px solid var(--ink);
 }
 

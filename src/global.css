@@ -2,15 +2,17 @@
     --ink: #1b1b1b;
     --muted: #707070;
     --line: #b9b9b9;
+    /* Gitterlinien wie im Druck */
+    --grid: #1b1b1b;
     --cell-bg: #ffffff;
-    --clue-bg: #eef0f2;
-    --clue-ink: #33373b;
-    --dead-bg: #d5d8db;
-    --hover: #e3e7ea;
+    --clue-bg: #ffffff;
+    --clue-ink: #1b1b1b;
+    --dead-bg: #e4e4e4;
+    --hover: #f1f1f1;
     --word-bg: #fff1b8;
     --cursor-bg: #ffd84d;
     --cursor-ring: #1b1b1b;
-    --arrow: #6b7075;
+    --arrow: #1b1b1b;
     --wrong: #c62828;
     --revealed: #1f5fbf;
     --ok: #2e7d32;

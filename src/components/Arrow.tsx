@@ -1,24 +1,26 @@
 import type { ArrowKind } from "../game/board.ts";
 import styles from "./Arrow.module.css";
 
-const PATHS: Record<ArrowKind, string> = {
-    right: "M1 6H10M7 3L10 6L7 9",
-    down: "M6 1V10M3 7L6 10L9 7",
-    "down-right": "M3 0V7H10M7 4L10 7L7 10",
-    "up-right": "M3 12V5H10M7 2L10 5L7 8",
-    "right-down": "M0 3H7V10M4 7L7 10L10 7",
-    "left-down": "M12 3H5V10M2 7L5 10L8 7",
+/**
+ * Pfeile wie im gedruckten Schwedenrätsel: gefülltes Dreieck an der Kante
+ * zum Hinweisfeld, bei Knickpfeilen mit kurzem Strich davor.
+ * Koordinaten in Prozent der Feldgröße (viewBox 100×100).
+ */
+const SHAPES: Record<ArrowKind, { line?: string; head: string }> = {
+    right: { head: "0,38 13,50 0,62" },
+    down: { head: "38,0 62,0 50,13" },
+    "down-right": { line: "M18 0V50H22", head: "22,39 34,50 22,61" },
+    "up-right": { line: "M18 100V50H22", head: "22,39 34,50 22,61" },
+    "right-down": { line: "M0 18H50V22", head: "39,22 61,22 50,34" },
+    "left-down": { line: "M100 18H50V22", head: "39,22 61,22 50,34" },
 };
 
-/** Kleiner Pfeil am Wortanfang, der zum Hinweisfeld zeigt */
 export function Arrow({ kind }: { kind: ArrowKind }) {
+    const { line, head } = SHAPES[kind];
     return (
-        <svg
-            className={`${styles.arrow} ${styles[kind]}`}
-            viewBox="0 0 12 12"
-            aria-hidden
-        >
-            <path d={PATHS[kind]} />
+        <svg className={styles.arrow} viewBox="0 0 100 100" aria-hidden>
+            {line && <path className={styles.line} d={line} />}
+            <polygon className={styles.head} points={head} />
         </svg>
     );
 }
