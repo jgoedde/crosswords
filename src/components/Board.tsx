@@ -5,15 +5,10 @@ import {
     useMemo,
     useRef,
 } from "react";
-import {
-    type ArrowKind,
-    arrowKind,
-    cellIndex,
-    wordAt,
-    wordCells,
-} from "../game/board.ts";
+import { arrowKind, cellIndex, wordAt, wordCells } from "../game/board.ts";
 import { SIZE } from "../game/generator.ts";
 import type { Action, GameState } from "../game/state.ts";
+import type { ArrowSpec, ClueHalf } from "./Arrow.tsx";
 import styles from "./Board.module.css";
 import { ClueCell } from "./ClueCell.tsx";
 import { LetterCell } from "./LetterCell.tsx";
@@ -35,13 +30,21 @@ export function Board({ state, dispatch }: Props) {
     const input = useRef<HTMLInputElement>(null);
 
     const arrowsAt = useMemo(() => {
-        const map = new Map<number, ArrowKind[]>();
+        const map = new Map<number, ArrowSpec[]>();
         for (const word of puzzle.words) {
             const i = cellIndex(word.row, word.col);
-            map.set(i, [...(map.get(i) ?? []), arrowKind(word)]);
+            // geteiltes Hinweisfeld: oben steht der erste Hinweis, unten der zweite
+            const clues =
+                index.cluesAt.get(cellIndex(word.clueRow, word.clueCol)) ?? [];
+            const half: ClueHalf =
+                clues.length < 2 ? null : clues[0] === word ? "top" : "bottom";
+            map.set(i, [
+                ...(map.get(i) ?? []),
+                { kind: arrowKind(word), half },
+            ]);
         }
         return map;
-    }, [puzzle]);
+    }, [puzzle, index]);
 
     const activeId = wordAt(index, cursor);
     const activeCells = useMemo(

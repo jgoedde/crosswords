@@ -1,10 +1,9 @@
-import type { ArrowKind } from "../game/board.ts";
-import { Arrow } from "./Arrow.tsx";
+import { Arrow, type ArrowSpec } from "./Arrow.tsx";
 import styles from "./LetterCell.module.css";
 
 interface Props {
     letter: string;
-    arrows: ArrowKind[];
+    arrows: ArrowSpec[];
     isCursor: boolean;
     inWord: boolean;
     wrong: boolean;
@@ -36,8 +35,8 @@ export function LetterCell({
             onMouseDown={(e) => e.preventDefault()}
             onClick={onSelect}
         >
-            {arrows.map((kind) => (
-                <Arrow key={kind} kind={kind} />
+            {arrows.map(({ kind, half }) => (
+                <Arrow key={kind} kind={kind} half={half} />
             ))}
             <span className={styles.letter}>{letter}</span>
         </div>
