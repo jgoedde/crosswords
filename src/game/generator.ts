@@ -34,6 +34,10 @@ const STEP_LIMIT = 20_000;
 const MAX_ATTEMPTS = 300;
 /** so viele vollständige Gitter werden verglichen, das dichteste gewinnt */
 const CANDIDATES = 6;
+/** Anteil der 2-Buchstaben-Wörter, die pro Versuch gesperrt werden (weniger Kleinkram) */
+const SHORT_BAN = 0.6;
+/** Strafpunkte je 2-Buchstaben-Wort beim Vergleich der Gitter */
+const SHORT_PENALTY = 2;
 /** pro Feld höchstens so viele Buchstaben probieren */
 const MAX_LETTERS = 5;
 /** Neigung, Hinweisfelder früh zu probieren (kleiner = dichter) */
@@ -62,7 +66,8 @@ const W = Math.ceil(N / 32);
  * das den Konflikt verursacht hat (Conflict-directed Backjumping).
  * Pro Schritt wird nichts allokiert.
  */
-function fillGrid(trie: Trie, entryCount: number, rng: Rng): Layout | null {
+function fillGrid(trie: Trie, banned: Uint8Array, rng: Rng): Layout | null {
+    const entryCount = banned.length;
     const cells = new Int8Array(N).fill(EMPTY);
     const hNode = new Int32Array(N);
     const vNode = new Int32Array(N);
@@ -73,13 +78,15 @@ function fillGrid(trie: Trie, entryCount: number, rng: Rng): Layout | null {
     const needRight = new Uint8Array(N);
     // Feld muss Hinweisfeld werden (Knickpfeil für Wörter am linken Rand)
     const forceBlock = new Uint8Array(N);
-    const used = new Uint8Array(entryCount);
+    const used = banned.slice();
     // Anzahl Hinweise pro Hinweisfeld (max. 2)
     const load = new Uint8Array(N);
     // welche Felder die Hinweise eines Hinweisfeldes ausgelöst haben
     const loaders = new Int16Array(N * 2);
     // Endfeld, an dem ein Wort bereits verwendet wurde
     const usedAt = new Int16Array(entryCount);
+    // gesperrte Wörter: kein Feld ist schuld
+    for (let w = 0; w < entryCount; w++) if (used[w]) usedAt[w] = -1;
     const bentAcross = new Int16Array(SIZE).fill(-1);
     const bentDown = new Int16Array(SIZE).fill(-1);
     // Kandidaten pro Feld (max. 26 Buchstaben + Hinweisfeld)
@@ -438,12 +445,21 @@ export function generatePuzzle(seed: string, wordList: string[][]): Puzzle {
         attempt < MAX_ATTEMPTS && found < CANDIDATES;
         attempt++
     ) {
-        const layout = fillGrid(trie, entries.length, rng);
+        // gesperrte Wörter gelten in fillGrid als bereits verwendet
+        const banned = new Uint8Array(entries.length);
+        entries.forEach((e, w) => {
+            if (e.answer.length === 2 && rng() < SHORT_BAN) banned[w] = 1;
+        });
+        const layout = fillGrid(trie, banned, rng);
         if (!layout) continue;
         const slots = findSlots(layout.cells);
         const clueCells = clueCellsFor(layout, slots);
         found++;
-        const score = layout.blocks + 2 * deadBlocks(layout.cells, clueCells);
+        const short = slots.filter((s) => s.answer.length === 2).length;
+        const score =
+            layout.blocks +
+            2 * deadBlocks(layout.cells, clueCells) +
+            SHORT_PENALTY * short;
         if (!best || score < best.score)
             best = { cells: layout.cells, slots, clueCells, score };
     }
