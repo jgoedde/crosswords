@@ -7,13 +7,16 @@ interface Props {
     onSelect: (id: number) => void;
 }
 
-/** Schriftstufe nach Textlänge, damit auch lange Hinweise ins Feld passen */
-function sizeClass(text: string, split: boolean): string {
-    const length = text.length + (split ? 6 : 0);
-    if (length <= 7) return styles.large;
-    if (length <= 13) return styles.medium;
-    if (length <= 20) return styles.small;
-    return styles.tiny;
+/**
+ * Schriftgröße (in % der Feldbreite), so groß wie der Platz erlaubt:
+ * Fläche reicht für die Zeichenzahl, längstes Wort wird höchstens einmal getrennt.
+ */
+function fontSize(text: string, split: boolean): number {
+    const area = split ? 66 : 95;
+    const max = split ? 24 : 30;
+    const longest = Math.max(...text.split(/[\s-]+/).map((w) => w.length));
+    const size = Math.min(area / Math.sqrt(text.length), 230 / longest, max);
+    return Math.max(size, split ? 12 : 14);
 }
 
 export function ClueCell({ clues, activeId, onSelect }: Props) {
@@ -27,9 +30,10 @@ export function ClueCell({ clues, activeId, onSelect }: Props) {
                     key={word.id}
                     type="button"
                     tabIndex={-1}
-                    className={`${styles.clue} ${sizeClass(word.clue, split)} ${
+                    className={`${styles.clue} ${
                         word.id === activeId ? styles.active : ""
                     }`}
+                    style={{ fontSize: `${fontSize(word.clue, split)}cqw` }}
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => onSelect(word.id)}
                     title={word.clue}
