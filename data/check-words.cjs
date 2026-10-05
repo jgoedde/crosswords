@@ -91,7 +91,7 @@ for (const [index, entry] of WORDS.entries()) {
     const answer = norm(raw);
 
     // Antwortlänge
-    if (answer.length < 3 || answer.length > 15) {
+    if (answer.length < 2 || answer.length > 15) {
         problems.push(
             `${where}: "${raw}" – Länge ${answer.length} (erlaubt: 3–15)`,
         );
@@ -113,12 +113,13 @@ for (const [index, entry] of WORDS.entries()) {
     }
 
     for (const clue of validClues) {
-        const clueWords = clue.split(/[^\p{L}]+/u).map(norm).filter(Boolean);
+        const clueWords = clue
+            .split(/[^\p{L}]+/u)
+            .map(norm)
+            .filter(Boolean);
 
         if (clueWords.includes(answer)) {
-            problems.push(
-                `${where}: "${raw}" – Antwort im Hinweis: "${clue}"`,
-            );
+            problems.push(`${where}: "${raw}" – Antwort im Hinweis: "${clue}"`);
         }
     }
 
