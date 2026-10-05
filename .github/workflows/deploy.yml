@@ -1,8 +1,9 @@
 name: Deploy GitHub Pages
 
 on:
+    # nur Releases deployen, z. B. per `npm version …` + `git push --follow-tags`
     push:
-        branches: [main]
+        tags: ["v*"]
     workflow_dispatch:
 
 permissions:
