@@ -40,7 +40,7 @@ export type Action =
     | { type: "reset" };
 
 /** Umlaute und ß werden wie in der Lösung ausgeschrieben */
-export function toLetters(text: string): string {
+function toLetters(text: string): string {
     return text
         .toUpperCase()
         .replace(/Ä/g, "AE")

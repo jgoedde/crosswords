@@ -9,7 +9,8 @@
         "preview": "vite preview",
         "check-words": "node data/check-words.cjs",
         "format": "prettier --write .",
-        "format:check": "prettier --check ."
+        "format:check": "prettier --check .",
+        "knip": "knip"
     },
     "dependencies": {
         "@fontsource/roboto-condensed": "^5.3.0",
@@ -21,6 +22,7 @@
         "@types/react": "^19.3.0",
         "@types/react-dom": "^19.3.0",
         "@vitejs/plugin-react": "^6.1.1",
+        "knip": "^6.38.0",
         "prettier": "^3.9.9",
         "typescript": "^7.0.2",
         "vite": "^8.3.2"

@@ -3,7 +3,7 @@ export interface Entry {
     clues: string[];
 }
 
-export function normalize(word: string): string {
+function normalize(word: string): string {
     return word
         .toUpperCase()
         .replace(/Ä/g, "AE")
