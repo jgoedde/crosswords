@@ -6,9 +6,9 @@
 
 .board {
     /* Feldgröße: passt in Breite und Höhe des Fensters */
-    --cell: min(calc((100vw - 2rem) / 15), calc((100dvh - 9rem) / 15), 3.75rem);
+    --cell: min(calc((100vw - 2rem) / 12), calc((100dvh - 9rem) / 14), 3.75rem);
     display: grid;
-    grid-template-columns: repeat(15, var(--cell));
+    grid-template-columns: repeat(12, var(--cell));
     grid-auto-rows: var(--cell);
     gap: 1px;
     padding: 1px;

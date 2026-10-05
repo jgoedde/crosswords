@@ -1,7 +1,8 @@
 import { buildEntries, type Entry, Trie } from "./dictionary.ts";
 import { createRng, hashSeed, type Rng } from "./random.ts";
 
-export const SIZE = 15;
+export const ROWS = 14;
+export const COLS = 12;
 
 export type Direction = "across" | "down";
 
@@ -27,7 +28,7 @@ export interface Puzzle {
 
 const BLOCK = 26;
 const EMPTY = -1;
-const N = SIZE * SIZE;
+const N = ROWS * COLS;
 
 /** Suchschritte pro Versuch, danach Neustart mit neuem Zufall */
 const STEP_LIMIT = 20_000;
@@ -87,8 +88,8 @@ function fillGrid(trie: Trie, banned: Uint8Array, rng: Rng): Layout | null {
     const usedAt = new Int16Array(entryCount);
     // gesperrte Wörter: kein Feld ist schuld
     for (let w = 0; w < entryCount; w++) if (used[w]) usedAt[w] = -1;
-    const bentAcross = new Int16Array(SIZE).fill(-1);
-    const bentDown = new Int16Array(SIZE).fill(-1);
+    const bentAcross = new Int16Array(ROWS).fill(-1);
+    const bentDown = new Int16Array(COLS).fill(-1);
     // Kandidaten pro Feld (max. 26 Buchstaben + Hinweisfeld)
     const options = new Int8Array(N * 27);
     const keys = new Float64Array(27);
@@ -106,24 +107,24 @@ function fillGrid(trie: Trie, banned: Uint8Array, rng: Rng): Layout | null {
     const collectConflicts = (i: number, r: number, c: number) => {
         const base = i * W;
         conflicts.fill(0, base, base + W);
-        for (let k = i - 1; k >= r * SIZE; k--) {
+        for (let k = i - 1; k >= r * COLS; k--) {
             add(base, k);
             if (cells[k] === BLOCK) break;
         }
-        for (let k = i - SIZE; k >= 0; k -= SIZE) {
+        for (let k = i - COLS; k >= 0; k -= COLS) {
             add(base, k);
             if (cells[k] === BLOCK) break;
         }
         // Nachbarn der Vorzeile (Pflichtfelder, Vorausschau rechts, Randregeln)
         if (r > 0)
             for (let dc = -1; dc <= 2; dc++)
-                if (c + dc >= 0 && c + dc < SIZE) {
-                    for (let k = i - SIZE + dc; k >= 0; k -= SIZE) {
+                if (c + dc >= 0 && c + dc < COLS) {
+                    for (let k = i - COLS + dc; k >= 0; k -= COLS) {
                         add(base, k);
                         if (cells[k] === BLOCK) break;
                     }
                 }
-        if (r > 1) add(base, i - 2 * SIZE);
+        if (r > 1) add(base, i - 2 * COLS);
     };
 
     /** Wortindex einer abgeschlossenen Folge; -1 = kein Wort nötig, -2 = ungültig */
@@ -150,8 +151,8 @@ function fillGrid(trie: Trie, banned: Uint8Array, rng: Rng): Layout | null {
 
     /** Hat das Feld rechts neben (r, c) noch irgendeine Möglichkeit, wenn links Knoten hc liegt? */
     const rightFeasible = (r: number, c: number, hc: number, hl: number) => {
-        const j = r * SIZE + c + 1;
-        const upJ = r > 0 && cells[j - SIZE] !== BLOCK ? j - SIZE : -1;
+        const j = r * COLS + c + 1;
+        const upJ = r > 0 && cells[j - COLS] !== BLOCK ? j - COLS : -1;
         const vp = upJ >= 0 ? vNode[upJ] : Trie.ROOT;
         const vl = upJ >= 0 ? vLen[upJ] : 0;
         const blockOk =
@@ -161,9 +162,9 @@ function fillGrid(trie: Trie, banned: Uint8Array, rng: Rng): Layout | null {
         if (forceBlock[j]) return false;
         for (let l = 0; l < 26; l++) {
             const h2 = trie.child(hc, l);
-            if (h2 < 0 || !trie.canEndWithin(h2, SIZE - 2 - c)) continue;
+            if (h2 < 0 || !trie.canEndWithin(h2, COLS - 2 - c)) continue;
             const v2 = trie.child(vp, l);
-            if (v2 >= 0 && (vl === 0 || trie.canEndWithin(v2, SIZE - 1 - r)))
+            if (v2 >= 0 && (vl === 0 || trie.canEndWithin(v2, ROWS - 1 - r)))
                 return true;
         }
         return false;
@@ -172,16 +173,16 @@ function fillGrid(trie: Trie, banned: Uint8Array, rng: Rng): Layout | null {
     const solve = (i: number): boolean => {
         if (i === N) return true;
         if (++steps > STEP_LIMIT) return false;
-        const r = (i / SIZE) | 0;
-        const c = i % SIZE;
+        const r = (i / COLS) | 0;
+        const c = i % COLS;
         const left = c > 0 && cells[i - 1] !== BLOCK ? i - 1 : -1;
-        const up = r > 0 && cells[i - SIZE] !== BLOCK ? i - SIZE : -1;
+        const up = r > 0 && cells[i - COLS] !== BLOCK ? i - COLS : -1;
         const hp = left >= 0 ? hNode[left] : Trie.ROOT;
         const hl = left >= 0 ? hLen[left] : 0;
         const vp = up >= 0 ? vNode[up] : Trie.ROOT;
         const vl = up >= 0 ? vLen[up] : 0;
         const mustLetter =
-            (r > 0 && needDown[i - SIZE] > 0) ||
+            (r > 0 && needDown[i - COLS] > 0) ||
             (c > 0 && needRight[i - 1] > 0);
         const own = i * W;
         conf = own;
@@ -194,10 +195,10 @@ function fillGrid(trie: Trie, banned: Uint8Array, rng: Rng): Layout | null {
             for (let l = 0; l < 26; l++) {
                 const hc = trie.child(hp, l);
                 if (hc < 0) continue;
-                if (hl > 0 && !trie.canEndWithin(hc, SIZE - 1 - c)) continue;
+                if (hl > 0 && !trie.canEndWithin(hc, COLS - 1 - c)) continue;
                 const vc = trie.child(vp, l);
                 if (vc < 0) continue;
-                if (vl > 0 && !trie.canEndWithin(vc, SIZE - 1 - r)) continue;
+                if (vl > 0 && !trie.canEndWithin(vc, ROWS - 1 - r)) continue;
                 const weight = Math.sqrt(trie.count[hc] * trie.count[vc]);
                 const key = Math.log(rng()) / weight;
                 // Einfügen, absteigend nach key
@@ -243,7 +244,7 @@ function fillGrid(trie: Trie, banned: Uint8Array, rng: Rng): Layout | null {
                     else if (w >= 0) useA = w;
                     else if (vLen[left] < 2) {
                         // Einzelbuchstabe braucht ein senkrechtes Wort
-                        if (r === SIZE - 1) ok = false;
+                        if (r === ROWS - 1) ok = false;
                         else markDown = left;
                     }
                 }
@@ -259,21 +260,21 @@ function fillGrid(trie: Trie, banned: Uint8Array, rng: Rng): Layout | null {
                 vNode[i] = vc;
                 hLen[i] = hl + 1;
                 vLen[i] = vl + 1;
-                if (c === SIZE - 1) {
+                if (c === COLS - 1) {
                     const w = closeRun(hc, hl + 1);
                     if (w === -2) ok = false;
                     else if (w >= 0) useA = w;
                     else if (vl === 0) {
-                        if (r === SIZE - 1) ok = false;
+                        if (r === ROWS - 1) ok = false;
                         else markDown = i;
                     }
                 } else if (!rightFeasible(r, c, hc, hl + 1)) ok = false;
-                if (ok && r === SIZE - 1) {
+                if (ok && r === ROWS - 1) {
                     const w = closeRun(vc, vl + 1);
                     if (w === -2 || (w >= 0 && w === useA)) ok = false;
                     else if (w >= 0) useB = w;
                     else if (hl === 0) {
-                        if (c === SIZE - 1) ok = false;
+                        if (c === COLS - 1) ok = false;
                         else markRight = i;
                     }
                 }
@@ -282,7 +283,7 @@ function fillGrid(trie: Trie, banned: Uint8Array, rng: Rng): Layout | null {
                     if (c >= 2) loadA = i - 2;
                     else {
                         // Wort am linken Rand: Knickpfeil von oben oder unten
-                        const above = i - 1 - SIZE;
+                        const above = i - 1 - COLS;
                         if (r > 0 && cells[above] === BLOCK && !full(above))
                             loadA = above;
                         else {
@@ -290,9 +291,9 @@ function fillGrid(trie: Trie, banned: Uint8Array, rng: Rng): Layout | null {
                             const closable =
                                 vLen[i - 1] === 1 ||
                                 trie.wordAt[vNode[i - 1]] >= 0;
-                            if (r === SIZE - 1 || !closable) ok = false;
+                            if (r === ROWS - 1 || !closable) ok = false;
                             else {
-                                markForce = i - 1 + SIZE;
+                                markForce = i - 1 + COLS;
                                 loadA = markForce;
                             }
                         }
@@ -301,7 +302,7 @@ function fillGrid(trie: Trie, banned: Uint8Array, rng: Rng): Layout | null {
                 }
                 // Ein neues senkrechtes Wort beginnt
                 if (ok && vl === 1) {
-                    if (r >= 2) loadB = i - 2 * SIZE;
+                    if (r >= 2) loadB = i - 2 * COLS;
                     else {
                         // Wort am oberen Rand: Knickpfeil von links oder rechts
                         // (das waagerechte Wort dieses Schritts zählt mit)
@@ -310,7 +311,7 @@ function fillGrid(trie: Trie, banned: Uint8Array, rng: Rng): Layout | null {
                             !full(b) &&
                             !(b === loadA && load[b] === 1);
                         if (c > 0 && room(c - 1)) loadB = c - 1;
-                        else if (c < SIZE - 1 && room(c + 1)) loadB = c + 1;
+                        else if (c < COLS - 1 && room(c + 1)) loadB = c + 1;
                         else ok = false;
                         if (ok) bentDown[c] = loadB;
                     }
@@ -376,13 +377,13 @@ function findSlots(cells: Int8Array): Slot[] {
     const letterAt = (r: number, c: number) =>
         r >= 0 &&
         c >= 0 &&
-        r < SIZE &&
-        c < SIZE &&
-        cells[r * SIZE + c] !== BLOCK
-            ? String.fromCharCode(65 + cells[r * SIZE + c])
+        r < ROWS &&
+        c < COLS &&
+        cells[r * COLS + c] !== BLOCK
+            ? String.fromCharCode(65 + cells[r * COLS + c])
             : null;
-    for (let r = 0; r < SIZE; r++)
-        for (let c = 0; c < SIZE; c++) {
+    for (let r = 0; r < ROWS; r++)
+        for (let c = 0; c < COLS; c++) {
             for (const direction of ["across", "down"] as const) {
                 const [dr, dc] = direction === "across" ? [0, 1] : [1, 0];
                 if (!letterAt(r, c) || letterAt(r - dr, c - dc)) continue;
@@ -406,17 +407,17 @@ function clueCellsFor(layout: Layout, slots: Slot[]): [number, number][] {
         if (s.direction === "across") {
             if (s.col > 0) return [s.row, s.col - 1];
             const k = layout.bentAcross[s.row];
-            return [(k / SIZE) | 0, k % SIZE];
+            return [(k / COLS) | 0, k % COLS];
         }
         if (s.row > 0) return [s.row - 1, s.col];
         const k = layout.bentDown[s.col];
-        return [(k / SIZE) | 0, k % SIZE];
+        return [(k / COLS) | 0, k % COLS];
     });
 }
 
 /** Hinweisfelder ohne Hinweis (je weniger, desto dichter wirkt das Rätsel) */
 function deadBlocks(cells: Int8Array, clueCells: [number, number][]): number {
-    const used = new Set(clueCells.map(([r, c]) => r * SIZE + c));
+    const used = new Set(clueCells.map(([r, c]) => r * COLS + c));
     let dead = 0;
     for (let i = 0; i < N; i++) if (cells[i] === BLOCK && !used.has(i)) dead++;
     return dead;
@@ -426,7 +427,7 @@ let cache: { entries: Entry[]; trie: Trie } | null = null;
 
 export function generatePuzzle(seed: string, wordList: string[][]): Puzzle {
     if (!cache) {
-        const entries = buildEntries(wordList, SIZE);
+        const entries = buildEntries(wordList, Math.max(ROWS, COLS));
         cache = { entries, trie: new Trie(entries) };
     }
     const { entries, trie } = cache;
@@ -465,9 +466,9 @@ export function generatePuzzle(seed: string, wordList: string[][]): Puzzle {
     }
     if (!best) throw new Error("Kein Rätsel gefunden");
 
-    const solution = Array.from({ length: SIZE }, (_, r) =>
-        Array.from({ length: SIZE }, (_, c) => {
-            const v = best.cells[r * SIZE + c];
+    const solution = Array.from({ length: ROWS }, (_, r) =>
+        Array.from({ length: COLS }, (_, c) => {
+            const v = best.cells[r * COLS + c];
             return v === BLOCK ? null : String.fromCharCode(65 + v);
         }),
     );

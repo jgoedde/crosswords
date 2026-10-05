@@ -6,7 +6,7 @@ import {
     useRef,
 } from "react";
 import { arrowKind, cellIndex, wordAt, wordCells } from "../game/board.ts";
-import { SIZE } from "../game/generator.ts";
+import { COLS, ROWS } from "../game/generator.ts";
 import type { Action, GameState } from "../game/state.ts";
 import type { ArrowSpec, ClueHalf } from "./Arrow.tsx";
 import styles from "./Board.module.css";
@@ -79,8 +79,8 @@ export function Board({ state, dispatch }: Props) {
     };
 
     const cells = [];
-    for (let r = 0; r < SIZE; r++)
-        for (let c = 0; c < SIZE; c++) {
+    for (let r = 0; r < ROWS; r++)
+        for (let c = 0; c < COLS; c++) {
             const i = cellIndex(r, c);
             const solution = puzzle.solution[r][c];
             cells.push(

@@ -1,4 +1,10 @@
-import { type Direction, type Puzzle, SIZE, type Word } from "./generator.ts";
+import {
+    COLS,
+    type Direction,
+    type Puzzle,
+    ROWS,
+    type Word,
+} from "./generator.ts";
 
 export interface Cursor {
     row: number;
@@ -25,7 +31,7 @@ export interface BoardIndex {
     order: Word[];
 }
 
-export const cellIndex = (row: number, col: number) => row * SIZE + col;
+export const cellIndex = (row: number, col: number) => row * COLS + col;
 
 export function wordCells(word: Word): number[] {
     return Array.from({ length: word.answer.length }, (_, i) =>
@@ -47,8 +53,8 @@ export function arrowKind(word: Word): ArrowKind {
 }
 
 export function buildIndex(puzzle: Puzzle): BoardIndex {
-    const across = new Int16Array(SIZE * SIZE).fill(-1);
-    const down = new Int16Array(SIZE * SIZE).fill(-1);
+    const across = new Int16Array(ROWS * COLS).fill(-1);
+    const down = new Int16Array(ROWS * COLS).fill(-1);
     const cluesAt = new Map<number, Word[]>();
     for (const word of puzzle.words) {
         const target = word.direction === "across" ? across : down;
@@ -105,7 +111,7 @@ export function step(
 ): [number, number] | null {
     for (
         let r = row + dr, c = col + dc;
-        r >= 0 && c >= 0 && r < SIZE && c < SIZE;
+        r >= 0 && c >= 0 && r < ROWS && c < COLS;
         r += dr, c += dc
     )
         if (puzzle.solution[r][c] !== null) return [r, c];

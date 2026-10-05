@@ -10,7 +10,7 @@ import {
     wordAt,
     wordCells,
 } from "./board.ts";
-import { type Puzzle, SIZE } from "./generator.ts";
+import { COLS, type Puzzle, ROWS } from "./generator.ts";
 
 export interface GameState {
     puzzle: Puzzle;
@@ -59,8 +59,8 @@ export function initialState(
     return {
         puzzle,
         index,
-        entries: saved?.entries ?? Array(SIZE * SIZE).fill(""),
-        revealed: saved?.revealed ?? Array(SIZE * SIZE).fill(false),
+        entries: saved?.entries ?? Array(ROWS * COLS).fill(""),
+        revealed: saved?.revealed ?? Array(ROWS * COLS).fill(false),
         cursor: first
             ? cursorOnWord(first, 0)
             : { row: 0, col: 0, direction: "across" },
@@ -79,7 +79,7 @@ function advance(s: GameState, entries: string[]): Cursor {
         if (!s.revealed[cells[k]]) return cursorOnWord(word, k);
     if (
         entries.every(
-            (e, i) => e || s.puzzle.solution[(i / SIZE) | 0][i % SIZE] === null,
+            (e, i) => e || s.puzzle.solution[(i / COLS) | 0][i % COLS] === null,
         )
     )
         return s.cursor;
@@ -90,7 +90,7 @@ function reveal(s: GameState, cells: number[]): GameState {
     const entries = [...s.entries];
     const revealed = [...s.revealed];
     for (const i of cells) {
-        entries[i] = s.puzzle.solution[(i / SIZE) | 0][i % SIZE] ?? "";
+        entries[i] = s.puzzle.solution[(i / COLS) | 0][i % COLS] ?? "";
         revealed[i] = true;
     }
     return { ...s, entries, revealed };
