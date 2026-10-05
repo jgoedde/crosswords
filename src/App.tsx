@@ -9,6 +9,8 @@ import { useSeed } from "./hooks/useSeed.ts";
 import { useReports } from "./hooks/useReports.ts";
 import styles from "./App.module.css";
 
+const REPO = "https://github.com/jgoedde/crosswords";
+
 export function App() {
     const [seed, setSeed] = useSeed();
     const { puzzle, error } = usePuzzle(seed);
@@ -53,6 +55,20 @@ function Game({
                 Richtung wechseln · Tab: nächstes Wort · Ä, Ö, Ü, ß werden zu
                 AE, OE, UE, SS
             </p>
+            <footer className={styles.footer}>
+                <a
+                    href={
+                        __COMMIT_SHA__
+                            ? `${REPO}/commit/${__COMMIT_SHA__}`
+                            : `${REPO}/tree/v${__APP_VERSION__}`
+                    }
+                    target="_blank"
+                    rel="noreferrer"
+                >
+                    v{__APP_VERSION__}
+                    {__COMMIT_SHA__ && ` · ${__COMMIT_SHA__.slice(0, 7)}`}
+                </a>
+            </footer>
         </main>
     );
 }

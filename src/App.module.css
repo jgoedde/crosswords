@@ -8,6 +8,17 @@
     color: var(--muted);
 }
 
+.footer {
+    margin-top: 0.5rem;
+    color: var(--muted);
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+.footer a {
+    color: inherit;
+}
+
 .help {
     max-width: 40rem;
     margin: 1rem auto 0;
