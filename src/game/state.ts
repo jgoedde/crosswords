@@ -109,10 +109,8 @@ export function reducer(s: GameState, action: Action): GameState {
             return { ...s, cursor: fitDirection(s.index, row, col, preferred) };
         }
         case "selectWord":
-            return {
-                ...s,
-                cursor: firstEmpty(s.puzzle.words[action.id], s.entries),
-            };
+            // Klick auf Hinweis: immer an den Wortanfang
+            return { ...s, cursor: cursorOnWord(s.puzzle.words[action.id], 0) };
         case "input": {
             let state = s;
             for (const letter of toLetters(action.text)) {
